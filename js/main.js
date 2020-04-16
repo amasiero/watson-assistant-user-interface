@@ -1,17 +1,20 @@
 window.onload = carregarDados();
+var session_id = '';
 
 function carregarDados() {
     let input = document.querySelector("#pergunta");
     if(input.value) criarMensagem(input.value, "me");
-
     let xhr = new XMLHttpRequest();
-    xhr.open("GET", `https://nodered-loja.mybluemix.net/chat?mensagem=${input.value ? input.value : ""}`);
+    xhr.open("GET", `https://nodered-loja.mybluemix.net/chat-1tdsa?mensagem=${input.value ? input.value : ""}&session_id=${session_id}`);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.onload = () => {
         if(xhr.status == 200) {
-            let respostas = JSON.parse(xhr.responseText);
-            respostas.forEach(resposta => criarMensagem(resposta.text, "bot"));
+            let resultado = JSON.parse(xhr.responseText);
+            resultado.respostas.forEach(resposta => {
+                if(resposta.text) criarMensagem(resposta.text, "bot");
+            });
+            session_id = resultado.session_id;
         }
     };
 
