@@ -52,3 +52,10 @@ function scrollDivDown(div) {
         div.scrollTop++;
     }
 }
+
+const input = document.querySelector("#pergunta");
+input.addEventListener("keypress", function(event) {
+    if(event.keyCode === 13) {
+        carregarDados();
+    }
+});
