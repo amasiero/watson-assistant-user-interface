@@ -1,61 +1,59 @@
-window.onload = carregarDados();
 var session_id = '';
 
-function carregarDados() {
-    let input = document.querySelector("#pergunta");
-    if(input.value) criarMensagem(input.value, "me");
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", `https://nodered-loja.mybluemix.net/chat-1tdsa?mensagem=${input.value ? input.value : ""}&session_id=${session_id}`);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+const carregarDados = () => {
+	const input = document.querySelector('#pergunta');
 
-    xhr.onload = () => {
-        if(xhr.status == 200) {
-            let resultado = JSON.parse(xhr.responseText);
-            resultado.respostas.forEach(resposta => {
-                if(resposta.text) criarMensagem(resposta.text, "bot");
-            });
-            session_id = resultado.session_id;
-        }
-    };
+	if (input.value) criaLinha(input.value, 'me');
 
-    xhr.onloadstart = () => {
-        let digitando = document.querySelector("span");
-        digitando.classList.add("ativo");
-    };
+	const digitando = document.querySelector('span');
+	digitando.classList.add('ativo');
 
-    xhr.onloadend = () => {
-        let digitando = document.querySelector("span");
-        digitando.classList.remove("ativo");
-    };
+	const mensagem = input.value ? input.value : '';
+	input.value = '';
 
-    xhr.send();
-    input.value = "";
-}
+	fetch(
+		`http://localhost:1880/chat?mensagem=${mensagem}&session_id=${session_id}`
+	)
+		.then((resultado) => resultado.json())
+		.then((dados) => {
+			dados.respostas.forEach((resposta) => {
+				if (resposta.text) criaLinha(resposta.text, 'bot');
+			});
+			session_id = dados.session_id;
+			digitando.classList.remove('ativo');
+		});
+};
 
-function criarMensagem(msg, tipo) {
-    var chat = document.querySelector(".conversa");
-    var div = criarDiv(msg, tipo);
-    chat.appendChild(div);
-    scrollDivDown(chat);
-}
+const criaLinha = (msg, tipo) => {
+	const chat = document.querySelector('.conversa');
+	const linha = document.createElement('div');
+	const balao = criaBalaoConversa(msg, tipo);
+	linha.classList.add('linha');
+	linha.appendChild(balao);
+	chat.appendChild(linha);
+	scrollDivDown(chat);
+};
 
-function criarDiv(texto, tipo) {
-    var div = document.createElement("div");
-    div.classList.add("chat");
-    div.classList.add(tipo);
-    div.textContent = texto;
-    return div;
-}
+const criaBalaoConversa = (texto, tipo) => {
+	const balao = document.createElement('div');
+	balao.classList.add('chat');
+	balao.classList.add(tipo);
+	balao.innerHTML = texto;
+	return balao;
+};
 
-function scrollDivDown(div) {
-    for (var i = 0; i < div.offsetHeight; i++) {
-        div.scrollTop++;
-    }
-}
+const scrollDivDown = (div) => {
+	for (let i = 0; i < div.offsetHeight; i++) {
+		div.scrollTop++;
+	}
+};
 
-const input = document.querySelector("#pergunta");
-input.addEventListener("keypress", function(event) {
-    if(event.keyCode === 13) {
-        carregarDados();
-    }
-});
+document
+	.querySelector('#pergunta')
+	.addEventListener('keypress', function (event) {
+		if (event.keyCode === 13) {
+			carregarDados();
+		}
+	});
+
+window.onload = carregarDados();
